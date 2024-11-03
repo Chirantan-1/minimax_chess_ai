@@ -2,59 +2,79 @@ from flask import Flask, render_template, request
 import chess, chess.svg, chess.polyglot
 from markupsafe import Markup
 
-p = [0, 0, 0, 0, 0, 0, 0, 0,
-     5, 10, 10, -20, -20, 10, 10, 5,
-     5, -5, -10, 0, 0, -10, -5, 5,
-     0, 0, 0, 20, 20, 0, 0, 0,
-     5, 5, 10, 25, 25, 10, 5, 5,
-     10, 10, 20, 30, 30, 20, 10, 10,
-     50, 50, 50, 50, 50, 50, 50, 50,
-     0, 0, 0, 0, 0, 0, 0, 0]
+p = [0,  0,   0,   0,   0,   0,  0, 0,
+                     5, 10,  10, -20, -20,  10, 10, 5,
+                     5, -5, -10,   0,   0, -10, -5, 5,
+                     0,  0,   0,  20,  20,   0,  0, 0,
+                     5,  5,  10,  25,  25,  10,  5, 5,
+                     10,10,  20,  30,  30,  20, 10,10,
+                     50,50,  50,  50,  50,  50, 50,50,
+                     0,  0,  0,    0,   0,   0,  0, 0
+                     ]
+
 
 n = [-50, -40, -30, -30, -30, -30, -40, -50,
-     -40, -20, 0, 5, 5, 0, -20, -40,
-     -30, 5, 10, 15, 15, 10, 5, -30,
-     -30, 0, 15, 20, 20, 15, 0, -30,
-     -30, 5, 15, 20, 20, 15, 5, -30,
-     -30, 0, 10, 15, 15, 10, 0, -30,
-     -40, -20, 0, 0, 0, 0, -20, -40,
-     -50, -40, -30, -30, -30, -30, -40, -50]
+                       -40, -20,   0,   0,   0,   0, -20, -40,
+                       -30,   5,  10,  15,  15,  10,   5, -30,
+                       -30,   0,  15,  20,  20,  15,   0, -30,
+                       -30,   5,  15,  20,  20,  15,   5, -30,
+                       -30,   0,  10,  15,  15,  10,   0, -30,
+                       -40, -20,   0,   5,   5,   0, -20, -40,
+                       -50, -40, -30, -30, -30, -30, -40, -50
+                       ]
+b = [-20,-10,-10,-10,-10,-10,-10,-20,
+                       -10,  5,  0,  0,  0,  0,  5,-10,
+                       -10, 10, 10, 10, 10, 10, 10,-10,
+                       -10,  0, 10, 10, 10, 10,  0,-10,
+                       -10,  5,  5, 10, 10,  5,  5,-10,
+                       -10,  0,  5, 10, 10,  5,  0,-10,
+                       -10,  0,  0,  0,  0,  0,  0,-10,
+                       -20,-10,-10,-10,-10,-10,-10,-20
+                       ]
+r = [ 0, 0,  0,  5,  5,  0,  0,  0,
+                     -5, 0,  0,  0,  0,  0,  0, -5,
+                     -5, 0,  0,  0,  0,  0,  0, -5,
+                     -5, 0,  0,  0,  0,  0,  0, -5,
+                     -5, 0,  0,  0,  0,  0,  0, -5,
+                     -5, 0,  0,  0,  0,  0,  0, -5,
+                      5,10, 10, 10, 10, 10, 10,  5,
+                      0, 0,  0,  0,  0,  0,  0,  0
+                     ]
 
-b = [-20, -10, -10, -10, -10, -10, -10, -20,
-     -10, 5, 0, 0, 0, 0, 5, -10,
-     -10, 10, 10, 10, 10, 10, 10, -10,
-     -10, 0, 10, 10, 10, 10, 0, -10,
-     -10, 5, 5, 10, 10, 5, 5, -10,
-     -10, 0, 5, 10, 10, 5, 0, -10,
-     -10, 0, 0, 0, 0, 0, 0, -10,
-     -20, -10, -10, -10, -10, -10, -10, -20]
+q = [-10,   5,   5,  5,  5,   5,   0, -10,
+                      -10,   0,   5,  0,  0,   0,   0, -10,
+                        0,   0,   5,  5,  5,   5,   0,  -5,
+                       -5,   0,   5,  5,  5,   5,   0,  -5,
+                      -10,   0,   0,  0,  0,   0,   0, -10,
+                      -10,   0,   5,  5,  5,   5,   0, -10,
+                      -20, -10, -10, -5, -5, -10, -10, -20,
+                      -20, -10, -10, -5, -5, -10, -10, -20
+                      ]
 
-r = [0, 0, 0, 5, 5, 0, 0, 0,
-     -5, 0, 0, 0, 0, 0, 0, -5,
-     -5, 0, 0, 0, 0, 0, 0, -5,
-     -5, 0, 0, 0, 0, 0, 0, -5,
-     -5, 0, 0, 0, 0, 0, 0, -5,
-     -5, 0, 0, 0, 0, 0, 0, -5,
-     5, 10, 10, 10, 10, 10, 10, 5,
-     0, 0, 0, 0, 0, 0, 0, 0]
+k1 = [ 20,  30,  10,   0,   0,  10,  30,  20,
+                           20,  20,   0,   0,   0,   0,  20,  20,
+                          -10, -20, -20, -20, -20, -20, -20, -10,
+                          -20, -30, -30, -40, -40, -30, -30, -20,
+                          -30, -40, -40, -50, -50, -40, -40, -30,
+                          -30, -40, -40, -50, -50, -40, -40, -30,
+                          -30, -40, -40, -50, -50, -40, -40, -30,
+                          -30, -40, -40, -50, -50, -40, -40, -30
+                          ]
 
-q = [-20, -10, -10, -5, -5, -10, -10, -20,
-     -10, 0, 0, 0, 0, 0, 0, -10,
-     -10, 5, 5, 5, 5, 5, 0, -10,
-     0, 0, 5, 5, 5, 5, 0, -5,
-     -5, 0, 5, 5, 5, 5, 0, -5,
-     -10, 0, 5, 5, 5, 5, 0, -10,
-     -10, 0, 0, 0, 0, 0, 0, -10,
-     -20, -10, -10, -5, -5, -10, -10, -20]
-
-k = [20, 30, 10, 0, 0, 10, 30, 20,
-     20, 20, 0, 0, 0, 0, 20, 20,
-     -10, -20, -20, -20, -20, -20, -20, -10,
-     -20, -30, -30, -40, -40, -30, -30, -20,
-     -30, -40, -40, -50, -50, -40, -40, -30,
-     -30, -40, -40, -50, -50, -40, -40, -30,
-     -30, -40, -40, -50, -50, -40, -40, -30,
-     -30, -40, -40, -50, -50, -40, -40, -30]
+k2 =  [-50, -30,-30,-30,-30,-30, -30, -50,
+       -30, -30,  0,  0,  0,  0, -30, -30,
+       -30, -10, 20, 30, 30, 20, -10, -30,
+       -30, -10, 30, 40, 40, 30, -10, -30,
+       -30, -10, 30, 40, 40, 30, -10, -30,
+       -30, -10, 20, 30, 30, 20, -10, -30,
+       -30, -20,-10,  0,  0,-10, -20, -30,
+       -50, -40,-30,-20,-20,-30, -40, -50
+          ]
+def k(m):
+     if m > 13:
+          return k1
+     else:
+          return k2
 
 app = Flask(__name__)
 bd = chess.Board()
@@ -117,11 +137,12 @@ def eval_brd():
         return -float("inf") if brd.turn else float("inf")
     if brd.is_stalemate() or brd.is_insufficient_material():
         return 0
-    mat_score = 200 * (len(brd.pieces(chess.PAWN, chess.WHITE)) - len(brd.pieces(chess.PAWN, chess.BLACK))) + \
-                640 * (len(brd.pieces(chess.KNIGHT, chess.WHITE)) - len(brd.pieces(chess.KNIGHT, chess.BLACK))) + \
-                660 * (len(brd.pieces(chess.BISHOP, chess.WHITE)) - len(brd.pieces(chess.BISHOP, chess.BLACK))) + \
-                1000 * (len(brd.pieces(chess.ROOK, chess.WHITE)) - len(brd.pieces(chess.ROOK, chess.BLACK))) + \
-                1800 * (len(brd.pieces(chess.QUEEN, chess.WHITE)) - len(brd.pieces(chess.QUEEN, chess.BLACK)))
+
+     b_m = (200 * (len(brd.pieces(chess.PAWN, chess.WHITE))) + (640 * (len(brd.pieces(chess.KNIGHT, chess.WHITE))) + (660 * (len(brd.pieces(chess.BISHOP, chess.WHITE))) + (1000 * (len(brd.pieces(chess.ROOK, chess.WHITE))) + (1800 * (len(brd.pieces(chess.QUEEN, chess.WHITE)))
+     w_m = (200 * (len(brd.pieces(chess.PAWN, chess.BLACK))) + (640 * (len(brd.pieces(chess.KNIGHT, chess.BLACK))) + (660 * (len(brd.pieces(chess.BISHOP, chess.BLACK))) + (1000 * (len(brd.pieces(chess.ROOK, chess.BLACK))) + (1800 * (len(brd.pieces(chess.QUEEN, chess.BLACK)))
+    
+     mat_score = b_m - w_m
+              
     pos_score = sum([
         sum([p[i] for i in brd.pieces(chess.PAWN, chess.WHITE)]) +
         sum([-p[chess.square_mirror(i)] for i in brd.pieces(chess.PAWN, chess.BLACK)]),
@@ -133,8 +154,8 @@ def eval_brd():
         sum([-r[chess.square_mirror(i)] for i in brd.pieces(chess.ROOK, chess.BLACK)]),
         sum([q[i] for i in brd.pieces(chess.QUEEN, chess.WHITE)]) +
         sum([-q[chess.square_mirror(i)] for i in brd.pieces(chess.QUEEN, chess.BLACK)]),
-        sum([k[i] for i in brd.pieces(chess.KING, chess.WHITE)]) +
-        sum([-k[chess.square_mirror(i)] for i in brd.pieces(chess.KING, chess.BLACK)])
+        sum([k(b_m)[i] for i in brd.pieces(chess.KING, chess.WHITE)]) +
+        sum([-k(w_m)[chess.square_mirror(i)] for i in brd.pieces(chess.KING, chess.BLACK)])
     ])
     eval_val = mat_score + pos_score
     return eval_val if brd.turn else -eval_val
