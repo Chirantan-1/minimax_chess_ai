@@ -138,10 +138,10 @@ def eval_brd():
     if brd.is_stalemate() or brd.is_insufficient_material():
         return 0
 
-     b_m = (200 * (len(brd.pieces(chess.PAWN, chess.WHITE))) + (640 * (len(brd.pieces(chess.KNIGHT, chess.WHITE))) + (660 * (len(brd.pieces(chess.BISHOP, chess.WHITE))) + (1000 * (len(brd.pieces(chess.ROOK, chess.WHITE))) + (1800 * (len(brd.pieces(chess.QUEEN, chess.WHITE)))
-     w_m = (200 * (len(brd.pieces(chess.PAWN, chess.BLACK))) + (640 * (len(brd.pieces(chess.KNIGHT, chess.BLACK))) + (660 * (len(brd.pieces(chess.BISHOP, chess.BLACK))) + (1000 * (len(brd.pieces(chess.ROOK, chess.BLACK))) + (1800 * (len(brd.pieces(chess.QUEEN, chess.BLACK)))
+    b_m = (200 * (len(brd.pieces(chess.PAWN, chess.WHITE)))) + (640 * (len(brd.pieces(chess.KNIGHT, chess.WHITE)))) + (660 * (len(brd.pieces(chess.BISHOP, chess.WHITE)))) + (1000 * (len(brd.pieces(chess.ROOK, chess.WHITE)))) + (1800 * (len(brd.pieces(chess.QUEEN, chess.WHITE))))
+    w_m = (200 * (len(brd.pieces(chess.PAWN, chess.BLACK)))) + (640 * (len(brd.pieces(chess.KNIGHT, chess.BLACK)))) + (660 * (len(brd.pieces(chess.BISHOP, chess.BLACK)))) + (1000 * (len(brd.pieces(chess.ROOK, chess.BLACK)))) + (1800 * (len(brd.pieces(chess.QUEEN, chess.BLACK))))
     
-     mat_score = b_m - w_m
+    mat_score = b_m - w_m
               
     pos_score = sum([
         sum([p[i] for i in brd.pieces(chess.PAWN, chess.WHITE)]) +
