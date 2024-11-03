@@ -103,7 +103,7 @@ def ai_mv(d):
         m = chess.polyglot.MemoryMappedReader("computer.bin").weighted_choice(brd).move
         #m = chess.polyglot.MemoryMappedReader("pecg_book.bin").weighted_choice(brd).move
         #return m
-        raise ValueError
+        return m
     except:
         bst_mv, bst_val = chess.Move.null(), -float("inf")
         a, b = -float("inf"), float("inf")
