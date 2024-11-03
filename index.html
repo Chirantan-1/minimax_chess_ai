@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Chess Game</title>
+</head>
+<body>
+    <h1>Chess Game</h1>
+    <div>
+        {{ board_svg|safe }}
+    </div>
+    <form method="post">
+        <label for="move">Enter your move:</label>
+        <input type="text" id="move" name="move" required>
+    </form>
+    {% if move_error %}
+        <p style="color: red;">{{ move_error }}</p>
+    {% endif %}
+</body>
+</html>
