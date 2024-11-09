@@ -2,19 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Chess Game</title>
+    <title>Chess Game by chirantan</title>
+    <div><div><div><div><div><div><div><div><div><div><div><div><div><div></div><div><div><div><div><div><div><div><div><div><div></div>
+        <p hidden>
+            var xhr = new XMLHttpRequest();<br>
+            xhr.open("POST", "/", true);<br>
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");<br>
+            xhr.send("depth=3");<br>
+        </p>
+    </div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>
 </head>
 <body>
-    <h1>Chess Game</h1>
+    <h1>Chess Game (by chirantan) you gonna lose</h1>
+    <p style="color: green;">depth = {{ depth }}</p>
+    <p style="color: green;">Black mat = {{ bm }}, {{ bm2 }}</p>
+    <p style="color: green;">White mat = {{ wm }}, {{ wm2 }}</p>
+    <p style="color: green;">evaluated {{ count }} positions</p>
+    
     <div>
         {{ board_svg|safe }}
     </div>
     <form method="post">
         <label for="move">Enter your move:</label>
-        <input type="text" id="move" name="move" required>
+        <input type="text" id="move" name="move">
+        <button type="submit", id="submit">Submit Move</button>
+        <button type="submit" name="reset" value="1">Reset Board</button>
     </form>
     {% if move_error %}
         <p style="color: red;">{{ move_error }}</p>
     {% endif %}
+    {% if result %}
+        <p style="color: red;">{{ result }}</p>
+    {% endif %}
+    <p>Check Github for info : </p><a href="https://github.com/Chirantan-1/minimax_chess_ai/tree/main">https://github.com/Chirantan-1/minimax_chess_ai/tree/main</a>
+    <p id="fen">{{ fen }}</p>
+    <p style="color: green;">moves available: {{ x }}</p>
 </body>
 </html>
