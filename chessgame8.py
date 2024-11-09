@@ -2,6 +2,8 @@ from flask import Flask, render_template, request
 import chess, chess.svg, chess.polyglot
 from markupsafe import Markup
 
+count = 0
+
 p = [0,  0,   0,   0,   0,   0,  0, 0,
                      5, 10,  10, -20, -20,  10, 10, 5,
                      5, -5, -10,   0,   0, -10, -5, 5,
@@ -70,11 +72,23 @@ k2 =  [-50, -30,-30,-30,-30,-30, -30, -50,
        -30, -20,-10,  0,  0,-10, -20, -30,
        -50, -40,-30,-20,-20,-30, -40, -50
           ]
-def k(m):
-     if m > 13:
-          return k1
-     else:
+
+d = 5
+
+def k(b, t):
+     global d
+     if ((len(b.pieces(chess.QUEEN, not t)) + len(b.pieces(chess.ROOK, not t))) <= 2) and ((len(b.pieces(chess.KNIGHT, not t)) + len(b.pieces(chess.BISHOP, not t))) <= 3) :
           return k2
+     else:
+          return k1
+
+
+def ud(b, t):
+    global d
+    if ((len(b.pieces(chess.QUEEN, t)) + len(b.pieces(chess.ROOK, t))) <= 2) and ((len(b.pieces(chess.KNIGHT, t)) + len(b.pieces(chess.BISHOP, t))) <= 3) :
+          d = 6
+    else:
+        d = 5
 
 app = Flask(__name__)
 bd = chess.Board()
@@ -82,28 +96,51 @@ bd = chess.Board()
 def brd_svg():
     return Markup(chess.svg.board(bd, size=500))
 
+
 @app.route("/", methods=["GET", "POST"])
 def idx():
-    global brd
+    global bd, d, count
     err = None
     if request.method == "POST":
-        mv = request.form.get("move")
-        try:
-            bd.push_san(mv)
-            if not bd.turn:
-                bd.push(ai_mv(4))
-        except ValueError:
-            err = "Invalid move! Please try again."
-    return render_template("index.html", board_svg=brd_svg(), move_error=err)
+        if request.form.get("reset"):
+            bd.reset()
+            d = 5
+        elif request.form.get("depth"):
+            d = int(request.form.get("depth"))
+        else:
+            mv = request.form.get("move")
+            try:
+                try:
+                    bd.push_san(mv)
+                except:
+                    bd.push_uci(mv)
+                if not bd.turn:
+                    ud(bd, chess.WHITE)
+                    ud(bd, chess.BLACK)
+                    ai_mv_d, c = ai_mv(d)
+                    bd.push(ai_mv_d)
+            except ValueError:
+                err = "Invalid move! Please try again."
+    count = 0
+    try:
+        c += 0
+    except:
+        c = 0
+
+    x = [bd.san(_) for _ in bd.legal_moves]
+    x = " ".join(x)
+
+    return render_template("index.html", board_svg=brd_svg(), move_error=err, depth=d, bm=len(bd.pieces(chess.QUEEN, chess.BLACK)) + len(bd.pieces(chess.ROOK, chess.BLACK)), bm2=len(bd.pieces(chess.KNIGHT, chess.BLACK)) + len(bd.pieces(chess.BISHOP, chess.BLACK)), wm=len(bd.pieces(chess.QUEEN, chess.WHITE)) + len(bd.pieces(chess.ROOK, chess.WHITE)), wm2=len(bd.pieces(chess.KNIGHT, chess.WHITE)) + len(bd.pieces(chess.BISHOP, chess.WHITE)), fen=bd.fen(), result=[bd.result(claim_draw=True) if bd.is_game_over(claim_draw=True) else None][0], count=c, x = x)
 
 def ai_mv(d):
+    global count
     brd = bd
     try:
         #m = chess.polyglot.MemoryMappedReader("human.bin").weighted_choice(brd).move
         m = chess.polyglot.MemoryMappedReader("computer.bin").weighted_choice(brd).move
         #m = chess.polyglot.MemoryMappedReader("pecg_book.bin").weighted_choice(brd).move
         #return m
-        return m
+        return m, 0
     except:
         bst_mv, bst_val = chess.Move.null(), -float("inf")
         a, b = -float("inf"), float("inf")
@@ -114,11 +151,16 @@ def ai_mv(d):
             if mv_val > bst_val:
                 bst_val, bst_mv = mv_val, mv
             a = max(a, mv_val)
-        return bst_mv
+        print(count)
+        return bst_mv, count
+
+
 
 def alphabeta(a, b, d):
+    global count
     brd = bd
     if d == 0 or brd.is_game_over():
+        count += 1
         return eval_brd()
     mx_val = -float("inf")
     for mv in brd.legal_moves:
@@ -140,9 +182,9 @@ def eval_brd():
 
     b_m = (200 * (len(brd.pieces(chess.PAWN, chess.WHITE)))) + (640 * (len(brd.pieces(chess.KNIGHT, chess.WHITE)))) + (660 * (len(brd.pieces(chess.BISHOP, chess.WHITE)))) + (1000 * (len(brd.pieces(chess.ROOK, chess.WHITE)))) + (1800 * (len(brd.pieces(chess.QUEEN, chess.WHITE))))
     w_m = (200 * (len(brd.pieces(chess.PAWN, chess.BLACK)))) + (640 * (len(brd.pieces(chess.KNIGHT, chess.BLACK)))) + (660 * (len(brd.pieces(chess.BISHOP, chess.BLACK)))) + (1000 * (len(brd.pieces(chess.ROOK, chess.BLACK)))) + (1800 * (len(brd.pieces(chess.QUEEN, chess.BLACK))))
-    
+
     mat_score = b_m - w_m
-              
+
     pos_score = sum([
         sum([p[i] for i in brd.pieces(chess.PAWN, chess.WHITE)]) +
         sum([-p[chess.square_mirror(i)] for i in brd.pieces(chess.PAWN, chess.BLACK)]),
@@ -154,8 +196,8 @@ def eval_brd():
         sum([-r[chess.square_mirror(i)] for i in brd.pieces(chess.ROOK, chess.BLACK)]),
         sum([q[i] for i in brd.pieces(chess.QUEEN, chess.WHITE)]) +
         sum([-q[chess.square_mirror(i)] for i in brd.pieces(chess.QUEEN, chess.BLACK)]),
-        sum([k(b_m)[i] for i in brd.pieces(chess.KING, chess.WHITE)]) +
-        sum([-k(w_m)[chess.square_mirror(i)] for i in brd.pieces(chess.KING, chess.BLACK)])
+        sum([k(brd, chess.BLACK)[i] for i in brd.pieces(chess.KING, chess.WHITE)]) +
+        sum([-k(brd, chess.WHITE)[chess.square_mirror(i)] for i in brd.pieces(chess.KING, chess.BLACK)])
     ])
     eval_val = mat_score + pos_score
     return eval_val if brd.turn else -eval_val
