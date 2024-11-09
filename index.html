@@ -27,6 +27,15 @@
         <input type="text" id="move" name="move">
         <button type="submit", id="submit">Submit Move</button>
         <button type="submit" name="reset" value="1">Reset Board</button>
+        <br>
+        <br>
+        <p style="color: aqua;">moves available: </p>
+        <div>
+            {% for move in x.split() %}
+            <button type="submit" name="move" value="{{ move }}" onclick="document.getElementById('move').value = '{{ move }}'; document.getElementById('submit').click();">{{ move }}</button>
+            {% endfor %}
+        </div>
+        <br>
     </form>
     {% if move_error %}
         <p style="color: red;">{{ move_error }}</p>
