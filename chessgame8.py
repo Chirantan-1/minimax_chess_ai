@@ -109,6 +109,7 @@ def idx():
             d = int(request.form.get("depth"))
         else:
             mv = request.form.get("move")
+            print(mv)
             try:
                 try:
                     bd.push_san(mv)
@@ -122,13 +123,17 @@ def idx():
             except ValueError:
                 err = "Invalid move! Please try again."
     count = 0
+    x = [bd.san(_) for _ in bd.legal_moves]
+
     try:
         c += 0
     except:
         c = 0
 
-    x = [bd.san(_) for _ in bd.legal_moves]
-    x = " ".join(x)
+    try:
+        x = " ".join(x)
+    except:
+        x = ""
 
     return render_template("index.html", board_svg=brd_svg(), move_error=err, depth=d, bm=len(bd.pieces(chess.QUEEN, chess.BLACK)) + len(bd.pieces(chess.ROOK, chess.BLACK)), bm2=len(bd.pieces(chess.KNIGHT, chess.BLACK)) + len(bd.pieces(chess.BISHOP, chess.BLACK)), wm=len(bd.pieces(chess.QUEEN, chess.WHITE)) + len(bd.pieces(chess.ROOK, chess.WHITE)), wm2=len(bd.pieces(chess.KNIGHT, chess.WHITE)) + len(bd.pieces(chess.BISHOP, chess.WHITE)), fen=bd.fen(), result=[bd.result(claim_draw=True) if bd.is_game_over(claim_draw=True) else None][0], count=c, x = x)
 
@@ -204,3 +209,4 @@ def eval_brd():
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
+
