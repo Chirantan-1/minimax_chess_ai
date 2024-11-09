@@ -4,6 +4,8 @@ from markupsafe import Markup
 
 count = 0
 
+ps = False
+
 p = [0,  0,   0,   0,   0,   0,  0, 0,
                      5, 10,  10, -20, -20,  10, 10, 5,
                      5, -5, -10,   0,   0, -10, -5, 5,
@@ -73,6 +75,8 @@ k2 =  [-50, -30,-30,-30,-30,-30, -30, -50,
        -50, -40,-30,-20,-20,-30, -40, -50
           ]
 
+PASSWORD = "HelloWorld123"
+
 d = 5
 
 def k(b, t):
@@ -137,16 +141,44 @@ def idx():
 
     return render_template("index.html", board_svg=brd_svg(), move_error=err, depth=d, bm=len(bd.pieces(chess.QUEEN, chess.BLACK)) + len(bd.pieces(chess.ROOK, chess.BLACK)), bm2=len(bd.pieces(chess.KNIGHT, chess.BLACK)) + len(bd.pieces(chess.BISHOP, chess.BLACK)), wm=len(bd.pieces(chess.QUEEN, chess.WHITE)) + len(bd.pieces(chess.ROOK, chess.WHITE)), wm2=len(bd.pieces(chess.KNIGHT, chess.WHITE)) + len(bd.pieces(chess.BISHOP, chess.WHITE)), fen=bd.fen(), result=[bd.result(claim_draw=True) if bd.is_game_over(claim_draw=True) else None][0], count=c, x = x)
 
+@app.route("/undo", methods=["GET", "POST"])
+def undo():
+    if ps:
+        if request.method == "POST":
+            password = request.form.get("password")
+            if password == PASSWORD:
+                try:
+                    if bd.turn == chess.WHITE:
+                        bd.pop()
+                    bd.pop()
+                except:
+                    pass
+                return "Undo complete"
+            return render_template("password.html", error="Incorrect password, try again.")
+
+        return render_template("password.html")
+    else:
+        try:
+            if bd.turn == chess.WHITE:
+                bd.pop()
+            bd.pop()
+        except:
+            pass
+        return "Undo complete"
+
+
 def ai_mv(d):
     global count
     brd = bd
     try:
-        #m = chess.polyglot.MemoryMappedReader("human.bin").weighted_choice(brd).move
-        m = chess.polyglot.MemoryMappedReader("computer.bin").weighted_choice(brd).move
-        #m = chess.polyglot.MemoryMappedReader("pecg_book.bin").weighted_choice(brd).move
+        #m = chess.polyglot.MemoryMappedReader("C:\\Users\\chira_mk2ov0g\\OneDrive\\Documents\\python\\human.bin").weighted_choice(brd).move
+        m = chess.polyglot.MemoryMappedReader("C:\\Users\\chira_mk2ov0g\\OneDrive\\Documents\\python\\computer.bin").weighted_choice(brd).move
+        #m = chess.polyglot.MemoryMappedReader("C:\\Users\\chira_mk2ov0g\\OneDrive\\Documents\\python\\pecg_book.bin").weighted_choice(brd).move
         #return m
+        print("yes")
         return m, 0
-    except:
+    except Exception as e:
+        print(e)
         bst_mv, bst_val = chess.Move.null(), -float("inf")
         a, b = -float("inf"), float("inf")
         for mv in brd.legal_moves:
